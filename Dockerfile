@@ -1,4 +1,4 @@
-# WidowMind Dashboard Dockerfile!
+# WidowMind Dashboard Dockerfile
 # Located at: /WidowMind/dashboard/Dockerfile
 
 FROM python:3.11-slim
