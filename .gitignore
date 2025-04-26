@@ -1,0 +1,15 @@
+# Ignore VS config
+.vs/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore macOS junk
+.DS_Store
+
+# Ignore build artifacts
+*.log
+*.sqlite
+*.db-journal
