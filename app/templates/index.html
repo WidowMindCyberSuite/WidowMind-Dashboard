@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🕷️ WidowMind Threat Console</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+    <div class="logo-pulse">🕷️</div>
+    <h1>WidowMind Threat Console</h1>
+    <div class="timestamp" id="timestamp"></div>
+</header>
+
+<section class="tabs">
+    <button id="tab-pending" class="tab active" onclick="setTab('pending')">Pending</button>
+    <button id="tab-safe" class="tab" onclick="setTab('safe')">Safe</button>
+    <button id="tab-threats" class="tab" onclick="setTab('confirmed')">Threats</button>
+</section>
+
+<section class="charts">
+    <canvas id="threatChart"></canvas>
+    <canvas id="sourceChart"></canvas>
+</section>
+
+<section class="table-container">
+    <div class="scroll-pane">
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Source</th>
+                    <th>Type</th>
+                    <th>Detail</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Device Name</th>
+                    <th>IP Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
+
+<footer>
+    WidowMind V1.5 © 2025 Common-Joe Cyber Labs
+</footer>
+
+<script src="/static/dashboard.js"></script>
+
+</body>
+</html>
