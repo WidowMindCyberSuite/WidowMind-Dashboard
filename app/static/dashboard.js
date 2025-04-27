@@ -1,5 +1,37 @@
 ﻿let threatChart, sourceChart;
-let activeTab = 'pending';  // Default start tab
+let activeTab = 'pending';  // Default active tab
+let coreUrl = "";           // Auto-discovered Core URL
+
+async function detectWidowMindCore() {
+    const ipsToTry = [
+        "http://localhost:5000",
+        "http://192.168.1.123:5000",
+        "http://192.168.1.1:5000",
+        "http://192.168.1.10:5000",
+        "http://192.168.1.100:5000",
+        "http://10.0.0.1:5000",
+        "http://10.0.0.100:5000"
+    ];
+
+    for (const ip of ipsToTry) {
+        try {
+            const res = await fetch(ip + "/api/health", { method: "GET" });
+            const data = await res.json();
+            if (data.status === "ok") {
+                coreUrl = ip;
+                console.log(`✅ WidowMind Core found at: ${coreUrl}`);
+                updateTimestamp();
+                fetchThreats();
+                return;
+            }
+        } catch (err) {
+            console.log(`❌ Failed to reach ${ip}`);
+        }
+    }
+
+    console.error("❌ WidowMind Core not found. Please check connection.");
+    document.getElementById('timestamp').innerText = "WidowMind Core NOT FOUND!";
+}
 
 function updateTimestamp() {
     const now = new Date();
@@ -7,7 +39,9 @@ function updateTimestamp() {
 }
 
 function fetchThreats() {
-    fetch("/data")
+    if (!coreUrl) return;
+
+    fetch(coreUrl + "/api/data")
         .then(res => res.json())
         .then(data => {
             const tbody = document.querySelector("tbody");
@@ -18,20 +52,18 @@ function fetchThreats() {
             let threatCount = 0;
 
             data.forEach(t => {
-                const threatStatus = t[6];
+                const threatStatus = t[5]; // Corrected to match database
 
-                // Count Threats
                 if (threatStatus === 'confirmed') {
                     threatCount++;
                 }
 
-                // Tab filtering
                 if (activeTab && activeTab !== threatStatus) {
                     return;
                 }
 
                 const row = document.createElement("tr");
-                row.className = "status-" + t[6];
+                row.className = "status-" + t[5];
 
                 row.innerHTML = `
                     <td>${t[1]}</td>
@@ -40,7 +72,6 @@ function fetchThreats() {
                     <td>${t[4]}</td>
                     <td>${t[5]}</td>
                     <td>${t[6]}</td>
-                    <td>${t[8]}</td>
                     <td>${t[7]}</td>
                     <td>
                         <button onclick="markThreat(${t[0]}, 'confirmed')">✔️ Threat</button>
@@ -56,11 +87,12 @@ function fetchThreats() {
 
             updateGraphs(sourceCount, typeCount);
             updateThreatTab(threatCount);
-        });
+        })
+        .catch(err => console.error("Fetch error:", err));
 }
 
 function markThreat(id, status) {
-    fetch("/update_status", {
+    fetch(coreUrl + "/api/update_status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id, status: status })
@@ -102,10 +134,8 @@ function updateGraphs(sourceData, typeData) {
 
 function setTab(tab) {
     activeTab = tab;
-
     document.querySelectorAll(".tab").forEach(btn => btn.classList.remove('active'));
     document.getElementById('tab-' + (tab === 'confirmed' ? 'threats' : tab)).classList.add('active');
-
     fetchThreats();
 }
 
@@ -123,6 +153,5 @@ function updateThreatTab(count) {
 setInterval(updateTimestamp, 1000);
 setInterval(fetchThreats, 10000);
 window.onload = () => {
-    updateTimestamp();
-    fetchThreats();
+    detectWidowMindCore();
 };
